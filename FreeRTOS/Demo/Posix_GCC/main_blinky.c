@@ -131,53 +131,82 @@ static QueueHandle_t xQueue = NULL;
 static TimerHandle_t xTimer = NULL;
 
 /*-----------------------------------------------------------*/
+#define configUSE_PREEMPTION      1
+#define configUSE_TIME_SLICING    1
+#define configMAX_PRIORITIES      5
 
-/*** SEE THE COMMENTS AT THE TOP OF THIS FILE ***/
-void main_blinky( void )
-{
-    const TickType_t xTimerPeriod = mainTIMER_SEND_FREQUENCY_MS;
-
-    /* Create the queue. */
-    xQueue = xQueueCreate( mainQUEUE_LENGTH, sizeof( uint32_t ) );
-
-    if( xQueue != NULL )
-    {
-        /* Start the two tasks as described in the comments at the top of this
-         * file. */
-        xTaskCreate( prvQueueReceiveTask,             /* The function that implements the task. */
-                     "Rx",                            /* The text name assigned to the task - for debug only as it is not used by the kernel. */
-                     configMINIMAL_STACK_SIZE,        /* The size of the stack to allocate to the task. */
-                     NULL,                            /* The parameter passed to the task - not used in this simple case. */
-                     mainQUEUE_RECEIVE_TASK_PRIORITY, /* The priority assigned to the task. */
-                     NULL );                          /* The task handle is not required, so NULL is passed. */
-
-        xTaskCreate( prvQueueSendTask, "TX", configMINIMAL_STACK_SIZE, NULL, mainQUEUE_SEND_TASK_PRIORITY, NULL );
-
-        /* Create the software timer, but don't start it yet. */
-        xTimer = xTimerCreate( "Timer",                     /* The text name assigned to the software timer - for debug only as it is not used by the kernel. */
-                               xTimerPeriod,                /* The period of the software timer in ticks. */
-                               pdTRUE,                      /* xAutoReload is set to pdTRUE. */
-                               NULL,                        /* The timer's ID is not used. */
-                               prvQueueSendTimerCallback ); /* The function executed when the timer expires. */
-
-        if( xTimer != NULL )
-        {
-            xTimerStart( xTimer, 0 );
-        }
-
-        /* Start the tasks and timer running. */
-        vTaskStartScheduler();
-    }
-
-    /* If all is well, the scheduler will now be running, and the following
-     * line will never be reached.  If the following line does execute, then
-     * there was insufficient FreeRTOS heap memory available for the idle and/or
-     * timer tasks	to be created.  See the memory management section on the
-     * FreeRTOS web site for more details. */
-    for( ; ; )
-    {
+void vTask1(void *pvParameters) {
+    for (;;) {
+        printf("Task 1 running\n");
+        vTaskDelay(pdMS_TO_TICKS(1000)); // Delay for 1000 ms
     }
 }
+
+void vTask2(void *pvParameters) {
+    for (;;) {
+        printf("Task 2 running\n");
+        vTaskDelay(pdMS_TO_TICKS(500)); // Delay for 500 ms
+    }
+}
+
+void main_blinky( void ) {
+    // Create tasks with different priorities
+    xTaskCreate(vTask1, "Task1", configMINIMAL_STACK_SIZE, NULL, 1, NULL);
+    xTaskCreate(vTask2, "Task2", configMINIMAL_STACK_SIZE, NULL, 2, NULL);
+
+    // Start scheduler
+    vTaskStartScheduler();
+
+    // Should not reach here
+    for (;;);
+}
+
+/*** SEE THE COMMENTS AT THE TOP OF THIS FILE ***/
+// void main_blinky( void )
+// {
+//     const TickType_t xTimerPeriod = mainTIMER_SEND_FREQUENCY_MS;
+
+//     /* Create the queue. */
+//     xQueue = xQueueCreate( mainQUEUE_LENGTH, sizeof( uint32_t ) );
+
+//     if( xQueue != NULL )
+//     {
+//         /* Start the two tasks as described in the comments at the top of this
+//          * file. */
+//         xTaskCreate( prvQueueReceiveTask,             /* The function that implements the task. */
+//                      "Rx",                            /* The text name assigned to the task - for debug only as it is not used by the kernel. */
+//                      configMINIMAL_STACK_SIZE,        /* The size of the stack to allocate to the task. */
+//                      NULL,                            /* The parameter passed to the task - not used in this simple case. */
+//                      mainQUEUE_RECEIVE_TASK_PRIORITY, /* The priority assigned to the task. */
+//                      NULL );                          /* The task handle is not required, so NULL is passed. */
+
+//         xTaskCreate( prvQueueSendTask, "TX", configMINIMAL_STACK_SIZE, NULL, mainQUEUE_SEND_TASK_PRIORITY, NULL );
+
+//         /* Create the software timer, but don't start it yet. */
+//         xTimer = xTimerCreate( "Timer",                     /* The text name assigned to the software timer - for debug only as it is not used by the kernel. */
+//                                xTimerPeriod,                /* The period of the software timer in ticks. */
+//                                pdTRUE,                      /* xAutoReload is set to pdTRUE. */
+//                                NULL,                        /* The timer's ID is not used. */
+//                                prvQueueSendTimerCallback ); /* The function executed when the timer expires. */
+
+//         if( xTimer != NULL )
+//         {
+//             xTimerStart( xTimer, 0 );
+//         }
+
+//         /* Start the tasks and timer running. */
+//         vTaskStartScheduler();
+//     }
+
+//     /* If all is well, the scheduler will now be running, and the following
+//      * line will never be reached.  If the following line does execute, then
+//      * there was insufficient FreeRTOS heap memory available for the idle and/or
+//      * timer tasks	to be created.  See the memory management section on the
+//      * FreeRTOS web site for more details. */
+//     for( ; ; )
+//     {
+//     }
+// }
 /*-----------------------------------------------------------*/
 
 static void prvQueueSendTask( void * pvParameters )

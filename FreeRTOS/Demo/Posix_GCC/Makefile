@@ -5,10 +5,10 @@ BUILD_DIR             := ./build
 BUILD_DIR_ABS         := $(abspath $(BUILD_DIR))
 
 FREERTOS_DIR_REL      := ../../../FreeRTOS
-FREERTOS_DIR          := $(abspath $(FREERTOS_DIR_REL))
+FREERTOS_DIR          := ../../../FreeRTOS
 
 FREERTOS_PLUS_DIR_REL := ../../../FreeRTOS-Plus
-FREERTOS_PLUS_DIR     := $(abspath $(FREERTOS_PLUS_DIR_REL))
+FREERTOS_PLUS_DIR     := ../../../FreeRTOS-Plus
 
 KERNEL_DIR            := ${FREERTOS_DIR}/Source
 
@@ -112,6 +112,14 @@ endif
 
 ifeq ($(USER_DEMO),FULL_DEMO)
   CPPFLAGS            +=   -DUSER_DEMO=1
+endif
+
+ifeq ($(USER_DEMO),RANK)
+  CPPFLAGS            +=   -DUSER_DEMO=2
+endif
+
+ifeq ($(USER_DEMO),ROUND_ROBIN)
+  CPPFLAGS            +=   -DUSER_DEMO=3
 endif
 
 

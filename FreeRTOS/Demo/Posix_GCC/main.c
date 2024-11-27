@@ -74,6 +74,8 @@
 
 #define    BLINKY_DEMO    0
 #define    FULL_DEMO      1
+#define    RANK           2
+#define    ROUND_ROBIN    3
 
 #ifdef BUILD_DIR
     #define BUILD         BUILD_DIR
@@ -94,6 +96,8 @@
 
 extern void main_blinky( void );
 extern void main_full( void );
+extern void main_rank( void );
+extern void main_round_robin( void );
 static void traceOnEnter( void );
 
 /*
@@ -177,6 +181,16 @@ int main( void )
     {
         console_print( "Starting full demo\n" );
         main_full();
+    }
+    #elif ( mainSELECTED_APPLICATION == RANK )
+    {
+        console_print( "Starting rank demo\n" );
+        main_rank();
+    }
+    #elif ( mainSELECTED_APPLICATION == ROUND_ROBIN )
+    {
+        console_print( "Starting round_robin demo\n" );
+        main_round_robin();
     }
     #else
     {

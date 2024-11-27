@@ -58,61 +58,21 @@ static TimerHandle_t xTimer = NULL;
 #include "task.h"
 #include <stdio.h>
 
-void PrintTaskStatus(void)
-{
-    /* 假设最多有 10 个任务 */
-    const UBaseType_t uxArraySize = 10;
-    TaskStatus_t pxTaskStatusArray[uxArraySize];
-    UBaseType_t uxTaskCount;
-    configRUN_TIME_COUNTER_TYPE ulTotalRunTime;
-
-    /* 获取任务状态 */
-    uxTaskCount = uxTaskGetSystemState(pxTaskStatusArray, uxArraySize, &ulTotalRunTime);
-
-    /* 打印任务状态信息 */
-    printf("Task Name      State   Priority   Stack Remaining   Runtime\r\n");
-    printf("-----------------------------------------------------------\r\n");
-
-    for (UBaseType_t i = 0; i < uxTaskCount; i++)
-    {
-        printf("%-15s %-7d %-10u %-15u %-10u\r\n",
-               pxTaskStatusArray[i].pcTaskName,
-               pxTaskStatusArray[i].eCurrentState,
-               pxTaskStatusArray[i].uxCurrentPriority,
-               pxTaskStatusArray[i].usStackHighWaterMark,
-               pxTaskStatusArray[i].ulRunTimeCounter);
-    }
-
-    /* 如果启用了运行时间统计 */
-    if (ulTotalRunTime > 0)
-    {
-        printf("Total Run Time: %u ticks\r\n", (unsigned int)ulTotalRunTime);
-    }
-    else
-    {
-        printf("Run time statistics not enabled.\r\n");
-    }
-}
 
 void vTask1(void *pvParameters) {
-    TickType_t xLastWakeTime;
-    const TickType_t xFrequency = pdMS_TO_TICKS(100); // 每100ms运行一次
+    // low priority (large deadline), high computation
     int i = 0;
-    // 初始化 xLastWakeTime 为当前时间
-    xLastWakeTime = xTaskGetTickCount();
     for (;;) {
         i++;
-        if (i == 1000000){
+        if (i == 10000000){
             i = 0;
-             printf("Task 1 running at tick: %lu\n", xTaskGetTickCount());
+            printf("Task 1 running at tick: %lu\n", xTaskGetTickCount());
         }
-       
-        // vTaskDelayUntil(&xLastWakeTime, xFrequency);
-
     }
 }
 
 void vTask2(void *pvParameters) {
+    // high priority (small deadline), low computation
     TickType_t xLastWakeTime;
     const TickType_t xFrequency = pdMS_TO_TICKS(30); // 每30ms运行一次
 
@@ -121,38 +81,14 @@ void vTask2(void *pvParameters) {
 
     for (;;) {
         printf("Task 2 running at tick: %lu\n", xTaskGetTickCount());
-        // 延时到下一个周期
         vTaskDelayUntil(&xLastWakeTime, xFrequency);
     }
 }
 
-void vTask3(void *pvParameters) {
-    for (;;) {
-    // printf("Task3 is running\n");
-    // vTaskSetDeadline(NULL, xTaskGetTickCount() + 100);
-    // 模拟任务执行
-    vTaskDelay(50);
-    }
-}
-
-void vTask4(void *pvParameters) {
-for (;;) {
-    // printf("Task4 is running\n");
-    // vTaskSetDeadline(NULL, xTaskGetTickCount() + 100);
-    // 模拟任务执行
-    vTaskDelay(50);
-}
-    
-}
-
 void main_edf( void ) {
-    printf("ddl\n");
-    // xTaskCreate(vTask1, "Task1", configMINIMAL_STACK_SIZE, NULL, 2, NULL);
-    // xTaskCreate(vTask2, "Task2", configMINIMAL_STACK_SIZE, NULL, 3, NULL);
     xTaskCreateWithDeadline(vTask1, "Task1", configMINIMAL_STACK_SIZE, NULL, 2, NULL, 18);
     xTaskCreateWithDeadline(vTask2, "Task2", configMINIMAL_STACK_SIZE, NULL, 2, NULL, 5);
     vTaskStartScheduler();
-    
-    // If the scheduler starts successfully, this point should never be reached
+
     for (;;);
 }

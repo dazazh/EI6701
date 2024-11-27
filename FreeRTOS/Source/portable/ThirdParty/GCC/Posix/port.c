@@ -305,7 +305,7 @@ static void prvPortYieldFromISR( void )
     Thread_t * xThreadToResume;
 
     xThreadToSuspend = prvGetThreadFromTask( xTaskGetCurrentTaskHandle() );
-    
+
     vTaskSwitchContext();
 
     xThreadToResume = prvGetThreadFromTask( xTaskGetCurrentTaskHandle() );
@@ -408,20 +408,20 @@ static void vPortSystemTickHandler( int sig )
     uxCriticalNesting++; /* Signals are blocked in this signal handler. */
 
     pxThreadToSuspend = prvGetThreadFromTask( xTaskGetCurrentTaskHandle() );
-    xTaskIncrementTick();
-    vTaskSwitchContext();
-    pxThreadToResume = prvGetThreadFromTask( xTaskGetCurrentTaskHandle() );
-    prvSwitchThread( pxThreadToResume, pxThreadToSuspend );
-    // if( xTaskIncrementTick() != pdFALSE )
-    // {
-    //     /* Select Next Task. */
-    //     printf("Tick schedule\n");
-    //     vTaskSwitchContext();
+    // xTaskIncrementTick();
+    // vTaskSwitchContext();
+    // pxThreadToResume = prvGetThreadFromTask( xTaskGetCurrentTaskHandle() );
+    // prvSwitchThread( pxThreadToResume, pxThreadToSuspend );
+    if( xTaskIncrementTick() != pdFALSE )
+    {
+        /* Select Next Task. */
+        printf("Tick schedule\n");
+        vTaskSwitchContext();
 
-    //     pxThreadToResume = prvGetThreadFromTask( xTaskGetCurrentTaskHandle() );
+        pxThreadToResume = prvGetThreadFromTask( xTaskGetCurrentTaskHandle() );
 
-    //     prvSwitchThread( pxThreadToResume, pxThreadToSuspend );
-    // }
+        prvSwitchThread( pxThreadToResume, pxThreadToSuspend );
+    }
     // vTaskSwitchContext();
     uxCriticalNesting--;
 }

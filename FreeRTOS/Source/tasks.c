@@ -267,6 +267,9 @@
  * Place the task represented by pxTCB into the appropriate ready list for
  * the task.  It is inserted at the end of the list.
  */
+
+
+
 #if ( configUSE_EDF_SCHEDULER == 1 )
     #define prvAddTaskToReadyList( pxTCB )                                                                              \
         do {                                                                                                       \
@@ -274,25 +277,53 @@
             taskRECORD_READY_PRIORITY( ( pxTCB )->uxPriority );                                                    \
             ListItem_t * const pxIndex = (& xEDFReadyList )->pxIndex;       \
             ListItem_t * cursor = listGET_HEAD_ENTRY( &xEDFReadyList );     \
+            if (( pxTCB )->deadline == 0) { \
+                ( pxTCB )->deadline = 10000; \
+            } \
             while( cursor != listGET_END_MARKER( &xEDFReadyList ) && ( ( TCB_t * ) listGET_LIST_ITEM_OWNER( cursor ) )->deadline < ( pxTCB )->deadline ) \
-            {                                                                                                      \
+            {                            \
                 cursor = listGET_NEXT( cursor );                                                                  \
             }                                                                                                      \
+            char * name = "END";\
+            if (cursor != listGET_END_MARKER( &xEDFReadyList )) {\
+                name = ((TCB_t *)(cursor->pvOwner))->pcTaskName;\
+            }\
             if ( cursor == listGET_END_MARKER( &xEDFReadyList ) )                                                  \
-            {                                                                                                      \
+            {                                           \                                                          
                 listINSERT_END( &xEDFReadyList, &( ( pxTCB )->xStateListItem ) );                                  \
+                xEDFReadyList.pxIndex = cursor; \
             }                                                                                                      \
             else                                                                                                   \
-            {                                                                                                      \
+            {                    \
                 (&( ( pxTCB )->xStateListItem ))->pxPrevious = cursor->pxPrevious;                                   \
                 (&( ( pxTCB )->xStateListItem ))->pxNext = cursor;                                                    \
                 cursor->pxPrevious->pxNext = (&( ( pxTCB )->xStateListItem ));                                        \
                 cursor->pxPrevious = &( ( pxTCB )->xStateListItem );                                                \
+                (&( ( pxTCB )->xStateListItem ))->pxContainer = (void *) (& xEDFReadyList );                             \                                                                                        
+                ( xEDFReadyList.uxNumberOfItems ) = ( UBaseType_t ) ( xEDFReadyList.uxNumberOfItems + 1U ); \
+                xEDFReadyList.pxIndex = listGET_END_MARKER( &xEDFReadyList ); \
             }                                                                                                       \
-            (&( ( pxTCB )->xStateListItem ))->pxContainer = (void *) (& xEDFReadyList );                             \                                                                                        
-            ((& xEDFReadyList )->uxNumberOfItems) ++;                                                               \     
             tracePOST_MOVED_TASK_TO_READY_STATE( pxTCB );                                                            \
         } while( 0 )                                                                                                \
+
+// #if ( configUSE_EDF_SCHEDULER == 1 )
+//     #define prvAddTaskToReadyList( pxTCB )                                                                              \
+//         do {                                                                                                       \
+//             List_t * const pxList = &( xEDFReadyList ); \
+//             ListItem_t * const pxNewListItem = &( ( pxTCB )->xStateListItem ); \
+//             ListItem_t * pxIterator = ( ListItem_t * ) &( pxList->xListEnd.pxNext ); \
+//             const TickType_t deadline = pxTCB->deadline; \
+//             printList(&xEDFReadyList, "xEDFReadyList");\
+//             printf("list end: %lu\n", (unsigned long)&( pxList->xListEnd )); \
+//             printf("next deadline: %p\n", (pxIterator->pvOwner)); \
+//             for( pxIterator = ( ListItem_t * ) &( pxList->xListEnd.pxNext ); ((TCB_t *)(pxIterator->pxNext->pvOwner))->deadline <= deadline; pxIterator = pxIterator->pxNext); \
+//             pxNewListItem->pxNext = pxIterator->pxNext; \
+//             pxNewListItem->pxNext->pxPrevious = pxNewListItem; \
+//             pxNewListItem->pxPrevious = pxIterator; \
+//             pxIterator->pxNext = pxNewListItem; \
+//             pxNewListItem->pxContainer = pxList; \
+//             ( pxList->uxNumberOfItems ) = ( UBaseType_t ) ( pxList->uxNumberOfItems + 1U ); \
+//             } while( 0 )                                                                                                \
 
 #else
     #define prvAddTaskToReadyList( pxTCB )                                                                     \
@@ -474,7 +505,60 @@ typedef struct tskTaskControlBlock       /* The old naming convention is used to
 /* The old tskTCB name is maintained above then typedefed to the new TCB_t name
  * below to enable the use of older kernel aware debuggers. */
 typedef tskTCB TCB_t;
+void printList(const List_t *list, const char *listName) {
+    if (list == NULL) {
+        printf("List '%s' is NULL.\n", listName);
+        return;
+    }
 
+    printf("Printing list: %s\n", listName);
+    printf("List has %lu items.\n", (unsigned long)list->uxNumberOfItems);
+
+    // Start at the first item
+    const ListItem_t *current = listGET_HEAD_ENTRY(list);
+    if (current == NULL) {
+        printf("List '%s' is empty.\n", listName);
+        return;
+    }
+    // Traverse the list
+    UBaseType_t counter = 0;
+    
+    do {
+        int deadline = 114514;
+        if ((TCB_t *)(current->pvOwner) != NULL){
+            deadline = ((TCB_t *)(current->pvOwner))->deadline;
+        }
+        char * taskname = "Empty";
+        if ((TCB_t *)(current->pvOwner) != NULL){
+            taskname = ((TCB_t *)(current->pvOwner))->pcTaskName;
+        }
+        printf("Item at %p: name = %s, deadline = %d, pvOwner = %p, pxNext = %p\n",
+                (void *)current,
+                taskname,
+               (unsigned long)deadline,
+               current->pvOwner,
+               current->pxNext);
+
+        current = current->pxNext;
+        counter++;
+        
+    } while (current != (const ListItem_t *)&(list->xListEnd)); // Stop at the end marker
+    int deadline = 114514;
+    if ((TCB_t *)(current->pvOwner) != NULL){
+        deadline = ((TCB_t *)(current->pvOwner))->deadline;
+    }
+    char * taskname = "Empty";
+    if ((TCB_t *)(current->pvOwner) != NULL){
+        taskname = ((TCB_t *)(current->pvOwner))->pcTaskName;
+    }
+    printf("Item at %p: name = %s, deadline = %d, pvOwner = %p, pxNext = %p\n",
+                (void *)current,
+                taskname,
+               (unsigned long)deadline,
+               current->pvOwner,
+               current->pxNext);
+    printf("End of list '%s'.\n", listName);
+}
 #if ( configNUMBER_OF_CORES == 1 )
     /* MISRA Ref 8.4.1 [Declaration shall be visible] */
     /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-84 */
@@ -1361,9 +1445,9 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
         traceENTER_xTaskCreateStatic( pxTaskCode, pcName, uxStackDepth, pvParameters, uxPriority, puxStackBuffer, pxTaskBuffer );
 
         pxNewTCB = prvCreateStaticTask( pxTaskCode, pcName, uxStackDepth, pvParameters, uxPriority, puxStackBuffer, pxTaskBuffer, &xReturn );
-        #if (configUSE_EDF_SCHEDULER == 1)
-            pxNewTCB -> deadline = 10000;
-        #endif
+        // #if (configUSE_EDF_SCHEDULER == 1)
+        //     pxNewTCB -> deadline = 10000;
+        // #endif
         if( pxNewTCB != NULL )
         {
             #if ( ( configNUMBER_OF_CORES > 1 ) && ( configUSE_CORE_AFFINITY == 1 ) )
@@ -4883,6 +4967,7 @@ BaseType_t xTaskIncrementTick( void )
 
                     /* Place the unblocked task into the appropriate ready
                      * list. */
+                    printf("%s is to be unblocked\n", pxTCB->pcTaskName);
                     prvAddTaskToReadyList( pxTCB );
 
                     /* A task being unblocked cannot cause an immediate
@@ -4901,6 +4986,11 @@ BaseType_t xTaskIncrementTick( void )
                              * handled below.*/
                             if( pxTCB->uxPriority > pxCurrentTCB->uxPriority )
                             {
+                                xSwitchRequired = pdTRUE;
+                            }
+                            else if ( pxTCB->deadline < pxCurrentTCB->deadline )
+                            {
+                                printf("Deadline of %s is earlier than %s\n, so we should schedule.", pxTCB->pcTaskName, pxCurrentTCB->pcTaskName);
                                 xSwitchRequired = pdTRUE;
                             }
                             else
@@ -5234,7 +5324,7 @@ BaseType_t xTaskIncrementTick( void )
                 listGET_OWNER_OF_NEXT_ENTRY(pxCurrentTCB,  &xEDFReadyList ); 
                 
                 // pxCurrentTCB = (TCB_t * ) listGET_OWNER_OF_HEAD_ENTRY( &(xEDFReadyList ) );
-                // printf("switching to task %s\n", pxCurrentTCB->pcTaskName);
+                printf("switching to task %s %lu\n", pxCurrentTCB->pcTaskName, pxCurrentTCB->deadline);
             }
             # else
             {

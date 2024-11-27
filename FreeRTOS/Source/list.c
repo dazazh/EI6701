@@ -135,6 +135,36 @@ void vListInsertEnd( List_t * const pxList,
     traceRETURN_vListInsertEnd();
 }
 /*-----------------------------------------------------------*/
+void vListInsertEDF( List_t * const pxList,
+                  ListItem_t * const pxNewListItem )
+{
+    ListItem_t * pxIterator;
+    const TickType_t deadline = pxNewListItem->xItemValue;
+
+    traceENTER_vListInsert( pxList, pxNewListItem );
+
+    for( pxIterator = ( ListItem_t * ) &( pxList->xListEnd ); pxIterator->pxNext->xItemValue <= deadline; pxIterator = pxIterator->pxNext )
+    {
+        /* There is nothing to do here, just iterating to the wanted
+            * insertion position.
+            * IF YOU FIND YOUR CODE STUCK HERE, SEE THE NOTE JUST ABOVE.
+            */
+    }
+    
+
+    pxNewListItem->pxNext = pxIterator->pxNext;
+    pxNewListItem->pxNext->pxPrevious = pxNewListItem;
+    pxNewListItem->pxPrevious = pxIterator;
+    pxIterator->pxNext = pxNewListItem;
+
+    /* Remember which list the item is in.  This allows fast removal of the
+     * item later. */
+    pxNewListItem->pxContainer = pxList;
+
+    ( pxList->uxNumberOfItems ) = ( UBaseType_t ) ( pxList->uxNumberOfItems + 1U );
+
+    traceRETURN_vListInsert();
+}
 
 void vListInsert( List_t * const pxList,
                   ListItem_t * const pxNewListItem )

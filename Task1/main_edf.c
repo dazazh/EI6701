@@ -86,8 +86,8 @@ void vTask2(void *pvParameters) {
 }
 
 void main_edf( void ) {
-    xTaskCreateWithDeadline(vTask1, "Task1", configMINIMAL_STACK_SIZE, NULL, 3, NULL, 5);
-    xTaskCreateWithDeadline(vTask2, "Task2", configMINIMAL_STACK_SIZE, NULL, 2, NULL, 18);
+    xTaskCreateWithDeadline(vTask1, "Task1", configMINIMAL_STACK_SIZE, NULL, 3, NULL, 18);
+    xTaskCreateWithDeadline(vTask2, "Task2", configMINIMAL_STACK_SIZE, NULL, 2, NULL, 5);
     vTaskStartScheduler();
     for (;;);
 }

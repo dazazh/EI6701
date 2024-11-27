@@ -465,6 +465,9 @@ void vListInitialiseItem( ListItem_t * const pxItem ) PRIVILEGED_FUNCTION;
 void vListInsert( List_t * const pxList,
                   ListItem_t * const pxNewListItem ) PRIVILEGED_FUNCTION;
 
+void vListInsertEDF( List_t * const pxList,
+                  ListItem_t * const pxNewListItem ) PRIVILEGED_FUNCTION;
+
 /*
  * Insert a list item into a list.  The item will be inserted in a position
  * such that it will be the last item within the list returned by multiple

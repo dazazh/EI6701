@@ -98,6 +98,9 @@ ifeq ($(USER_DEMO),ROUND_ROBIN)
   CPPFLAGS            +=   -DUSER_DEMO=3
 endif
 
+ifeq ($(USER_DEMO),EDF)
+  CPPFLAGS            +=   -DUSER_DEMO=4
+endif
 
 # 对象文件路径生成规则（保留源文件的子目录结构）
 OBJ_FILES := $(patsubst %.c,$(BUILD_DIR)/%.o,$(SOURCE_FILES))

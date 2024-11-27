@@ -127,6 +127,7 @@ void vConfigureTimerForRunTimeStats( void );    /* Prototype of function that in
 #define INCLUDE_xSemaphoreGetMutexHolder          1
 #define INCLUDE_xTimerPendFunctionCall            1
 #define INCLUDE_xTaskAbortDelay                   1
+#define configUSE_TIME_SLICING                    0
 
 #define configINCLUDE_MESSAGE_BUFFER_AMP_DEMO     0
 #if ( configINCLUDE_MESSAGE_BUFFER_AMP_DEMO == 1 )
@@ -205,3 +206,9 @@ extern void vLoggingPrintf( const char * pcFormatString,
     #define FreeRTOS_printf( X )    vLoggingPrintf X
 #endif
 #endif /* FREERTOS_CONFIG_H */
+#define configUSE_EDF_SCHEDULER                    1
+
+#define configUSE_TRACE_FACILITY  1
+#define configUSE_STATS_FORMATTING_FUNCTIONS  1
+#define configCHECK_FOR_STACK_OVERFLOW 2
+#define configUSE_TICK_HOOK 1

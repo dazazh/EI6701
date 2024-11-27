@@ -76,6 +76,7 @@
 #define    FULL_DEMO      1
 #define    RANK           2
 #define    ROUND_ROBIN    3
+#define    EDF    4
 
 #ifdef BUILD_DIR
     #define BUILD         BUILD_DIR
@@ -97,6 +98,7 @@
 extern void main_blinky( void );
 extern void main_rank( void );
 extern void main_round_robin( void );
+extern void main_edf( void );
 static void traceOnEnter( void );
 
 /*
@@ -186,6 +188,11 @@ int main( void )
         console_print( "Starting round_robin demo\n" );
         main_round_robin();
     }
+    #elif ( mainSELECTED_APPLICATION == EDF )
+    {
+        console_print( "Starting edf demo\n" );
+        main_edf();
+    }
     #else
     {
         #error "The selected demo is not valid"
@@ -248,7 +255,7 @@ void vApplicationStackOverflowHook( TaskHandle_t pxTask,
 {
     ( void ) pcTaskName;
     ( void ) pxTask;
-
+    printf("Stack Overflow in task: %s\r\n", pcTaskName);
     /* Run time stack overflow checking is performed if
      * configCHECK_FOR_STACK_OVERFLOW is defined to 1 or 2.  This hook
      * function is called if a stack overflow is detected.  This function is
@@ -271,7 +278,10 @@ void vApplicationTickHook( void )
     {
         vFullDemoTickHookFunction();
     }
+   
     #endif /* mainSELECTED_APPLICATION */
+    // TickType_t xTickCount = xTaskGetTickCountFromISR();
+    // printf("Tick Hook: Tick count = %lu\r\n", xTickCount);
 }
 
 /*-----------------------------------------------------------*/

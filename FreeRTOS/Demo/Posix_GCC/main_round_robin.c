@@ -23,7 +23,7 @@ void rbTask2(void *pvParameters) {
     vTaskDelete(NULL);  // 任务结束，删除自己
 }
 
-int main(void) {
+int main_round_robin(void) {
     // 创建任务a，优先级为2
     xTaskCreate(rbTask1, "rbTask1", configMINIMAL_STACK_SIZE, NULL, 2, NULL);
     

@@ -95,7 +95,6 @@
 /*-----------------------------------------------------------*/
 
 extern void main_blinky( void );
-extern void main_full( void );
 extern void main_rank( void );
 extern void main_round_robin( void );
 static void traceOnEnter( void );
@@ -176,11 +175,6 @@ int main( void )
     {
         console_print( "Starting echo blinky demo\n" );
         main_blinky();
-    }
-    #elif ( mainSELECTED_APPLICATION == FULL_DEMO )
-    {
-        console_print( "Starting full demo\n" );
-        main_full();
     }
     #elif ( mainSELECTED_APPLICATION == RANK )
     {

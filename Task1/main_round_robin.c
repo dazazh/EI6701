@@ -1,3 +1,6 @@
+#define configUSE_PREEMPTION            0  // 禁用抢占式调度
+#define configUSE_TIME_SLICING          1  // 启用时间片轮转
+#define configTICK_RATE_HZ    100          // 定义时间片轮转频率为100Hz
 #include "FreeRTOS.h"
 #include "task.h"
 #include "stdio.h"
@@ -7,10 +10,11 @@ void rbTask1(void *pvParameters) {
     int t = 0;
     while (1) {
         t++;
-        if(t==1000000000){
-            printf("Task1 running\n");
-            t=0;
-        } 
+        if (t == 1000000) {
+            printf("Task 1 running at tick: %lu\n", xTaskGetTickCount());
+            t = 0;
+        }
+        
     }
     vTaskDelete(NULL);  // 任务结束，删除自己
 }
@@ -18,12 +22,13 @@ void rbTask1(void *pvParameters) {
 // 任务b函数（输出2）
 void rbTask2(void *pvParameters) {
     int t = 0;
-     while (1) {
+    while (1) {
         t++;
-        if(t==1000000000){ 
-            printf("Task2 running\n");
-            t=0;
-        } 
+        if (t == 1000000) {
+            printf("Task 2 running at tick: %lu\n", xTaskGetTickCount());
+            t = 0;
+        }
+        
     }
     vTaskDelete(NULL);  // 任务结束，删除自己
 }

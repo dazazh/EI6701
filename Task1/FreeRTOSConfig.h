@@ -37,7 +37,7 @@
 * https://www.FreeRTOS.org/a00110.html
 *----------------------------------------------------------*/
 
-#define configUSE_PREEMPTION                       0
+#define configUSE_PREEMPTION                       1
 #define configUSE_PORT_OPTIMISED_TASK_SELECTION    0
 #define configUSE_IDLE_HOOK                        1
 #define configUSE_TICK_HOOK                        1
@@ -205,7 +205,3 @@ extern void vLoggingPrintf( const char * pcFormatString,
     #define FreeRTOS_printf( X )    vLoggingPrintf X
 #endif
 #endif /* FREERTOS_CONFIG_H */
-
-#define configUSE_PREEMPTION            0  // 禁用抢占式调度
-#define configUSE_TIME_SLICING          1  // 启用时间片轮转
-#define configTICK_RATE_HZ    100          // 定义时间片轮转频率为100Hz

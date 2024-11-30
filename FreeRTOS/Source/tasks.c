@@ -543,7 +543,7 @@ void printList(const List_t *list, const char *listName) {
         counter++;
         
     } while (current != (const ListItem_t *)&(list->xListEnd)); // Stop at the end marker
-    int deadline = 114514;
+    int deadline = 123456;
     if ((TCB_t *)(current->pvOwner) != NULL){
         deadline = ((TCB_t *)(current->pvOwner))->deadline;
     }
@@ -5321,9 +5321,9 @@ BaseType_t xTaskIncrementTick( void )
             /* coverity[misra_c_2012_rule_11_5_violation] */
             #if (configUSE_EDF_SCHEDULER == 1)
             {
-                listGET_OWNER_OF_NEXT_ENTRY(pxCurrentTCB,  &xEDFReadyList ); 
+                // listGET_OWNER_OF_NEXT_ENTRY(pxCurrentTCB,  &xEDFReadyList ); 
                 
-                // pxCurrentTCB = (TCB_t * ) listGET_OWNER_OF_HEAD_ENTRY( &(xEDFReadyList ) );
+                pxCurrentTCB = (TCB_t * ) listGET_OWNER_OF_HEAD_ENTRY( &(xEDFReadyList ) );
                 printf("switching to task %s %lu\n", pxCurrentTCB->pcTaskName, pxCurrentTCB->deadline);
             }
             # else

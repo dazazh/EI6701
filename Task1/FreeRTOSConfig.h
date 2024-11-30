@@ -36,6 +36,7 @@
 * FreeRTOS API DOCUMENTATION AVAILABLE ON THE FreeRTOS.org WEB SITE.  See
 * https://www.FreeRTOS.org/a00110.html
 *----------------------------------------------------------*/
+#define configGENERATE_RUN_TIME_STATS  1 //任务计时宏
 
 #define configUSE_PREEMPTION                       1
 #define configUSE_PORT_OPTIMISED_TASK_SELECTION    0
@@ -91,7 +92,7 @@
 /* Run time stats gathering configuration options. */
 unsigned long ulGetRunTimeCounterValue( void ); /* Prototype of function that returns run time counter. */
 void vConfigureTimerForRunTimeStats( void );    /* Prototype of function that initialises the run time counter. */
-#define configGENERATE_RUN_TIME_STATS             1
+// #define configGENERATE_RUN_TIME_STATS             1
 
 /* Co-routine related configuration options. */
 #define configUSE_CO_ROUTINES                     0

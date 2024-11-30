@@ -72,10 +72,8 @@
     #include <trcRecorder.h>
 #endif
 
-#define    BLINKY_DEMO    0
-#define    FULL_DEMO      1
-#define    RANK           2
-#define    ROUND_ROBIN    3
+#define    RANK           0
+#define    ROUND_ROBIN    1
 
 #ifdef BUILD_DIR
     #define BUILD         BUILD_DIR
@@ -87,7 +85,7 @@
 #ifdef USER_DEMO
     #define     mainSELECTED_APPLICATION    USER_DEMO
 #else /* Default Setting */
-    #define    mainSELECTED_APPLICATION     FULL_DEMO
+    #define    mainSELECTED_APPLICATION     RANK
 #endif
 
 /* This demo uses heap_3.c (the libc provided malloc() and free()). */
@@ -171,12 +169,7 @@ int main( void )
     #endif /* if ( projENABLE_TRACING == 1 ) */
 
     console_init();
-    #if ( mainSELECTED_APPLICATION == BLINKY_DEMO )
-    {
-        console_print( "Starting echo blinky demo\n" );
-        main_blinky();
-    }
-    #elif ( mainSELECTED_APPLICATION == RANK )
+    #if ( mainSELECTED_APPLICATION == RANK )
     {
         console_print( "Starting rank demo\n" );
         main_rank();
@@ -232,13 +225,13 @@ void vApplicationIdleHook( void )
     usleep( 15000 );
     traceOnEnter();
 
-    #if ( mainSELECTED_APPLICATION == FULL_DEMO )
-    {
-        /* Call the idle task processing used by the full demo.  The simple
-         * blinky demo does not use the idle task hook. */
-        vFullDemoIdleFunction();
-    }
-    #endif
+    // #if ( mainSELECTED_APPLICATION == FULL_DEMO )
+    // {
+    //     /* Call the idle task processing used by the full demo.  The simple
+    //      * blinky demo does not use the idle task hook. */
+    //     vFullDemoIdleFunction();
+    // }
+    // #endif
 }
 
 /*-----------------------------------------------------------*/
@@ -267,11 +260,11 @@ void vApplicationTickHook( void )
     * code must not attempt to block, and only the interrupt safe FreeRTOS API
     * functions can be used (those that end in FromISR()). */
 
-    #if ( mainSELECTED_APPLICATION == FULL_DEMO )
-    {
-        vFullDemoTickHookFunction();
-    }
-    #endif /* mainSELECTED_APPLICATION */
+    // #if ( mainSELECTED_APPLICATION == FULL_DEMO )
+    // {
+    //     vFullDemoTickHookFunction();
+    // }
+    // #endif /* mainSELECTED_APPLICATION */
 }
 
 /*-----------------------------------------------------------*/

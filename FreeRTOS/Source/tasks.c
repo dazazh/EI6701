@@ -1717,6 +1717,59 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
     }
 /*-----------------------------------------------------------*/
 
+    typedef struct HashEntry {
+        const char *pcName;
+        int value;
+        struct HashEntry *next;
+    } HashEntry;
+
+    #define TABLE_SIZE 10000000
+
+    HashEntry *hashTable[TABLE_SIZE];
+
+    unsigned int hash(const char *str) {
+        unsigned int hashVal = 0;
+        while (*str) {
+            hashVal = (hashVal * 31) + *str++;
+        }
+        return hashVal % TABLE_SIZE;
+    }
+
+    void insert(const char *key, int value) {
+        unsigned int index = hash(key);
+        //printf("Inserting %s with value %d\n", key, value);
+        HashEntry *newEntry = (HashEntry *)malloc(sizeof(HashEntry));
+        newEntry->pcName = key;
+        newEntry->value = value;
+        newEntry->next = hashTable[index];
+        hashTable[index] = newEntry;
+    }
+
+    int getValueFromHash(const char *key) {
+        unsigned int index = hash(key);
+        HashEntry *entry = hashTable[index];
+        while (entry) {
+            if (strcmp(entry->pcName, key) == 0) {
+                return entry->value;
+            }
+            entry = entry->next;
+        }
+        return -1;  // 键没有找到时返回一个错误值
+    }
+
+    BaseType_t xTaskCreate_ddl (TaskFunction_t pxTaskCode,
+                    const char * const pcName,
+                    const configSTACK_DEPTH_TYPE uxStackDepth,
+                    void * const pvParameters,
+                    UBaseType_t uxPriority,
+                    TaskHandle_t * const pxCreatedTask,
+                    int deadline)
+    {   
+        insert(pcName, deadline);
+        return xTaskCreate( pxTaskCode, pcName, uxStackDepth, pvParameters, uxPriority, pxCreatedTask );
+    }
+
+
     BaseType_t xTaskCreate( TaskFunction_t pxTaskCode,
                             const char * const pcName,
                             const configSTACK_DEPTH_TYPE uxStackDepth,
@@ -5087,6 +5140,8 @@ BaseType_t xTaskIncrementTick( void )
     void vTaskSwitchContext( void )
     {
         traceENTER_vTaskSwitchContext();
+        //TCB_t formerTCB = pxCurrentTCB;
+
 
         if( uxSchedulerSuspended != ( UBaseType_t ) 0U )
         {
@@ -5117,6 +5172,8 @@ BaseType_t xTaskIncrementTick( void )
                 if( ulTotalRunTime[ 0 ] > ulTaskSwitchedInTime[ 0 ] )
                 {
                     pxCurrentTCB->ulRunTimeCounter += ( ulTotalRunTime[ 0 ] - ulTaskSwitchedInTime[ 0 ] );
+
+                    //if(pxCurrentTCB->ulRunTimeCounter)
                 }
                 else
                 {
@@ -5127,6 +5184,9 @@ BaseType_t xTaskIncrementTick( void )
             }
             #endif /* configGENERATE_RUN_TIME_STATS */
 
+
+            char* formerTCB_pcTaskName = pxCurrentTCB->pcTaskName;
+            configRUN_TIME_COUNTER_TYPE formerTCB_Runtime = pxCurrentTCB->ulRunTimeCounter;
             /* Check for stack overflow, if configured. */
             taskCHECK_FOR_STACK_OVERFLOW();
 
@@ -5148,7 +5208,14 @@ BaseType_t xTaskIncrementTick( void )
             /* Macro to inject port specific behaviour immediately after
              * switching tasks, such as setting an end of stack watchpoint
              * or reconfiguring the MPU. */
+            //printf("%s 被阻塞/完成\n",formerTCB->pcTaskName);
+
             portTASK_SWITCH_HOOK( pxCurrentTCB );
+            printf("%s运行时间:%llu,其deadline为:%d,系统运行时间:%llu\n",formerTCB_pcTaskName,formerTCB_Runtime,getValueFromHash(formerTCB_pcTaskName),ulTotalRunTime[0]);
+            if(ulTotalRunTime[ 0 ]>getValueFromHash(formerTCB_pcTaskName)){
+                printf("%s 超时！\n",formerTCB_pcTaskName);
+            }
+            printf("cpu从 %s 调度到 %s ,开始时刻为：%llu\n",formerTCB_pcTaskName,pxCurrentTCB->pcTaskName,ulTotalRunTime[ 0 ]);
 
             /* After the new task is switched in, update the global errno. */
             #if ( configUSE_POSIX_ERRNO == 1 )

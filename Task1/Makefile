@@ -82,20 +82,12 @@ ifdef SANITIZE_LEAK
   LDFLAGS             +=   -fsanitize=leak
 endif
 
-ifeq ($(USER_DEMO),BLINKY_DEMO)
+ifeq ($(USER_DEMO),RANK)
   CPPFLAGS            +=   -DUSER_DEMO=0
 endif
 
-ifeq ($(USER_DEMO),FULL_DEMO)
-  CPPFLAGS            +=   -DUSER_DEMO=1
-endif
-
-ifeq ($(USER_DEMO),RANK)
-  CPPFLAGS            +=   -DUSER_DEMO=2
-endif
-
 ifeq ($(USER_DEMO),ROUND_ROBIN)
-  CPPFLAGS            +=   -DUSER_DEMO=3
+  CPPFLAGS            +=   -DUSER_DEMO=1
 endif
 
 

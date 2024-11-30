@@ -5212,11 +5212,13 @@ BaseType_t xTaskIncrementTick( void )
 
             portTASK_SWITCH_HOOK( pxCurrentTCB );
             printf("%s运行时间:%llu,其deadline为:%d,系统运行时间:%llu\n",formerTCB_pcTaskName,formerTCB_Runtime,getValueFromHash(formerTCB_pcTaskName),ulTotalRunTime[0]);
-            if(ulTotalRunTime[ 0 ]>getValueFromHash(formerTCB_pcTaskName)){
-                printf("%s 超时！\n",formerTCB_pcTaskName);
-            }
+            // if(ulTotalRunTime[ 0 ]>getValueFromHash(formerTCB_pcTaskName)){
+            //     printf("%s 超时！\n",formerTCB_pcTaskName);
+            // }
             printf("cpu从 %s 调度到 %s ,开始时刻为：%llu\n",formerTCB_pcTaskName,pxCurrentTCB->pcTaskName,ulTotalRunTime[ 0 ]);
-
+            if(ulTotalRunTime[ 0 ]>getValueFromHash(pxCurrentTCB->pcTaskName)){
+                printf("%s 超时！\n",pxCurrentTCB->pcTaskName);
+            }
             /* After the new task is switched in, update the global errno. */
             #if ( configUSE_POSIX_ERRNO == 1 )
             {

@@ -41,6 +41,8 @@
 #include "timers.h"
 #include "stack_macros.h"
 
+// bool chaoshi[TABLE_SIZE];
+
 /* The default definitions are only available for non-MPU ports. The
  * reason is that the stack alignment requirements vary for different
  * architectures.*/
@@ -1724,6 +1726,8 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
     } HashEntry;
 
     #define TABLE_SIZE 10000000
+
+    
 
     HashEntry *hashTable[TABLE_SIZE];
 
@@ -5217,7 +5221,7 @@ BaseType_t xTaskIncrementTick( void )
             // }
             printf("cpu从 %s 调度到 %s ,开始时刻为：%llu\n",formerTCB_pcTaskName,pxCurrentTCB->pcTaskName,ulTotalRunTime[ 0 ]);
             if(ulTotalRunTime[ 0 ]>getValueFromHash(pxCurrentTCB->pcTaskName)){
-                printf("%s 超时！\n",pxCurrentTCB->pcTaskName);
+                printf("%s 超时！逾期时间为:%d\n",pxCurrentTCB->pcTaskName,getValueFromHash(pxCurrentTCB->pcTaskName)-ulTotalRunTime[0]);
             }
             /* After the new task is switched in, update the global errno. */
             #if ( configUSE_POSIX_ERRNO == 1 )
